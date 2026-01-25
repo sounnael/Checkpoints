@@ -1,0 +1,14 @@
+import random
+x = random.randint(1,100)
+print("Welcome to Guess he Number Game")
+print("I'm thinking of a number between 1 and 100. Would yo like to guess it?")
+n=int(input("Enter the value"" "))
+while n != x:
+    print(x)
+    n=int(input("Enter the value"" "))
+    if n>x:
+        print("The value you entered is greater than the right value, try again: ")
+    elif n<x:
+        print("The value you entered is lower than the right value, try again:" )
+    else:
+        print("Congrats you found the number!")
