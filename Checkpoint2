@@ -1,0 +1,80 @@
+# Question 1  
+# Write a Python program that multiplies all the items in a list.
+
+list1 = [2, 3, 6]
+list2 = [10, 1.5, 5]
+
+result1 = 1
+result2 = 1
+
+for nb in list1:
+    result1 = result1 * nb
+
+for nb in list2:
+    result2 = result2 * nb
+
+print (f"Product result of {list1} is: {result1}")
+print (f"Product result of {list2} is: {result2}")
+
+# Question 2
+# Write a Python program to get a list, sorted in increasing order by the last element in each tuple, from a given list of non-empty tuples.
+
+unordered_list = [(2, 5), (1, 2), (4, 4), (2, 3), (2, 1)]
+ordered_list = sorted(unordered_list, key = lambda x: x[-1])
+print(f"The ordered list is: {ordered_list}")
+
+# Question 3 
+# Write a Python program that combines two dictionaries by adding values for common keys.
+d1 = {"x": 5, "y": 12, "r": 8, "z": 7}
+d2 = {"x": 14, "y": 9, "h": 3} 
+dresult = d1.copy()
+for key in d2:
+    if key in dresult:
+        dresult[key] = d1[key] + d2[key]
+    else:
+        dresult[key] = d2[key]
+print(f"The result is: {dresult}")
+ 
+# Question 4
+
+# With a given integral number n, write a program to generate a dictionary that contains (i, i*i) so that is an integral number between 1 and n (both included). Then the program should print the dictionary. Suppose the following input is supplied to the program: 8. Then, the output should be: {1: 1, 2: 4, 3: 9, 4: 16, 5: 25, 6: 36, 7: 49, 8: 64}
+
+n=int(input(f"Enter a number of your choice: "))
+
+result= {}
+
+for i in range(1,n+1):
+    result [i] = i*i
+
+print(f"The result is: {result}")
+
+# Question 5
+
+# Write a program to sort a tuple by its float element.
+ 
+list= [('item1', '12.20'), ('item2', '15.10'), ('item3', '24.5')]
+new_list = sorted(list, key = lambda x: x[-1], reverse = True)
+
+print(f"The new list is: {new_list}")
+ 
+# Question 6
+# Write a Python program to create a set.
+
+n1=int(input(f"Enter a number: "))
+
+new_set = {i for i in range(n1)} 
+
+print(f"Your original set is: {new_set}")
+
+
+# Write a Python program to iteration over sets.
+for i in new_set:
+    print (i)
+
+# Write a Python program to add members in a set and to remove items from a given set.
+
+new_set.update([10,9,8])
+print(f"The updated set is: {new_set}")
+
+new_set.remove(2)
+print(f"The updated set after removing items is: {new_set}")
