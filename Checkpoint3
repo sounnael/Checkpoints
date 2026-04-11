@@ -1,1 +1,30 @@
+def op():
+    while True:
+        x = float(input("Please enter the first value: "))
+        
+        op_type = input("Please enter one of these arithmetic symbols> +, -, *, /, ** : ")
 
+        y = float(input("Please enter the second value: "))
+        
+        if op_type == "+" :
+            result = x + y
+        elif op_type == "-" :
+            result = x - y
+        elif op_type == "*" :
+            result = x * y
+        elif op_type == "/" :
+            if y==0 :
+                result = "invalid operation"
+            result = x / y
+        elif op_type == "**" :
+            result = x ** y
+        elif op_type not in ["+","-","*","/","**"]:
+            result = "unknown operation"
+        print(f"Result is: {result}")
+
+        again = input("\nDo you want to perform another calculation? (yes/no): ").lower()
+        if again != 'yes' and again != 'y':
+            print("Thank you for using the calculator! Goodbye!")
+            return result
+    
+op()
