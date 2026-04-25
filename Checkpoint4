@@ -1,0 +1,70 @@
+# bank_account.py
+
+class Account:
+    def __init__(self, account_number, account_holder, account_balance=0.0):
+        self.account_number = account_number
+        self.account_balance = account_balance
+        self.account_holder = account_holder
+    
+    def deposit(self, amount):
+        """Add money to the account"""
+        self.account_balance += amount
+        print(f"Deposited ${amount}. New balance: ${self.account_balance}")
+    
+    def withdraw(self, amount):
+        """Take money out if you have enough"""
+        if self.account_balance >= amount:
+            self.account_balance -= amount
+            print(f"Withdrew ${amount}. New balance: ${self.account_balance}")
+            return True
+        else:
+            print(f"Sorry, you only have ${self.account_balance}. Can't withdraw ${amount}.")
+            return False
+    
+    def check_balance(self):
+        """Show current balance"""
+        print(f"Balance for {self.account_holder}: ${self.account_balance}")
+        return self.account_balance
+
+
+# Create my account
+my_account = Account("12345", "Sami", 1000)
+
+# Try out the methods
+print("=== Testing my account ===")
+my_account.check_balance()
+my_account.deposit(250)
+my_account.withdraw(100)
+my_account.withdraw(2000)  # This one should fail
+my_account.check_balance()
+
+# Test with different accounts
+print("\n=== Testing multiple accounts ===")
+
+# Create a few different accounts
+savings = Account("67890", "Yassmine", 500)
+checking = Account("11121", "Adam", 50)
+emergency = Account("33344", "Achraf", 2000)
+
+# Do different things with each
+print("\n-- Yassmine's savings --")
+savings.deposit(100)
+savings.withdraw(50)
+savings.check_balance()
+
+print("\n-- Adam's checking (he's broke) --")
+checking.withdraw(75)  # Not enough money
+checking.deposit(30)
+checking.check_balance()
+
+print("\n-- Achraf's emergency fund --")
+emergency.withdraw(500)
+emergency.withdraw(300)
+emergency.deposit(1000)
+emergency.check_balance()
+
+# Show all final balances
+print("\n=== Final balances ===")
+print(f"{savings.account_holder}: ${savings.account_balance}")
+print(f"{checking.account_holder}: ${checking.account_balance}")
+print(f"{emergency.account_holder}: ${emergency.account_balance}")
