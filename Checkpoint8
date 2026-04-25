@@ -1,0 +1,72 @@
+import math
+
+class Calculator:
+    def __init__(self):
+        self.operations = {
+            '+': lambda a,b: a+b,
+            '-': lambda a,b: a-b,
+            '*': lambda a,b: a*b,
+            '/': lambda a,b: a/b if b!=0 else exec('raise ZeroDivisionError("Cannot divide by zero")')
+        }
+    
+    def add_operation(self, symbol, func):
+        self.operations[symbol] = func
+    
+    def calculate(self, a, operation, b=None):
+        # Input validation
+        if not isinstance(a, (int, float)):
+            raise TypeError(f"{a} is not a number")
+        if b is not None and not isinstance(b, (int, float)):
+            raise TypeError(f"{b} is not a number")
+        if operation not in self.operations:
+            raise KeyError(f"Unknown operation: {operation}")
+        
+        # Perform calculation
+        try:
+            if b is None:
+                return self.operations[operation](a)
+            else:
+                return self.operations[operation](a, b)
+        except Exception as e:
+            print(f"Calculation error: {e}")
+            raise
+
+# Advanced functions
+def power(a, b): return a ** b
+def sqrt(a, b=None): 
+    if a < 0: raise ValueError("Cannot take sqrt of negative")
+    return math.sqrt(a)
+def log(a, b=None):
+    if a <= 0: raise ValueError("Log only for positive numbers")
+    return math.log(a)
+
+# Main program
+if __name__ == "__main__":
+    calc = Calculator()
+    calc.add_operation('^', power)
+    calc.add_operation('sqrt', sqrt)
+    calc.add_operation('log', log)
+    
+    print("Advanced Calculator (type 'quit' to exit)")
+    print(f"Available ops: {list(calc.operations.keys())}")
+    
+    while True:
+        cmd = input("\nOperation: ").strip().lower()
+        if cmd == 'quit': break
+        
+        if cmd not in calc.operations:
+            print("Invalid operation!")
+            continue
+        
+        try:
+            if cmd == 'sqrt' or cmd == 'log':
+                num = float(input("Enter number: "))
+                result = calc.calculate(num, cmd)
+                print(f"Result: {result}")
+            else:
+                a = float(input("First number: "))
+                b = float(input("Second number: "))
+                result = calc.calculate(a, cmd, b)
+                print(f"Result: {result}")
+        except Exception as e:
+            print(f"Error: {e}")
