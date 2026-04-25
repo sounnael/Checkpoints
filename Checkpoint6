@@ -1,0 +1,63 @@
+import pandas as pd
+
+# Create the employee dataframe
+data = {
+    'Name': ['John', 'Mary', 'Bob', 'Sarah', 'Tom', 'Lisa'],
+    'Department': ['IT', 'Marketing', 'Sales', 'IT', 'Finance', 'Marketing'],
+    'Age': [30, 40, 25, 35, 45, 28],
+    'Gender': ['Male', 'Female', 'Male', 'Female', 'Male', 'Female'],
+    'Salary': [50000, 60000, 45000, 55000, 70000, 55000],
+    'Experience': [3, 7, 2, 5, 10, 4]
+}
+
+employee_df = pd.DataFrame(data)
+
+print("=" * 60)
+print("EMPLOYEE DATAFRAME - FULL DATASET")
+print("=" * 60)
+print(employee_df)
+print("\n")
+
+# 1. Use iloc to select the first 3 rows
+print("=" * 60)
+print("1. FIRST 3 ROWS (using iloc)")
+print("=" * 60)
+first_three = employee_df.iloc[0:3]
+print(first_three)
+print("\n")
+
+# 2. Use loc to select all rows where Department is "Marketing"
+print("=" * 60)
+print("2. MARKETING DEPARTMENT (using loc)")
+print("=" * 60)
+marketing_employees = employee_df.loc[employee_df['Department'] == 'Marketing']
+print(marketing_employees)
+print("\n")
+
+# 3. Use iloc to select Age and Gender columns for the first 4 rows
+print("=" * 60)
+print("3. AGE & GENDER FOR FIRST 4 ROWS (using iloc)")
+print("=" * 60)
+# Age is column index 2, Gender is column index 3
+age_gender_first4 = employee_df.iloc[0:4, 2:4]
+print(age_gender_first4)
+print("\n")
+
+# 4. Use loc to select Salary and Experience for all rows where Gender is "Male"
+print("=" * 60)
+print("4. SALARY & EXPERIENCE FOR MALE EMPLOYEES (using loc)")
+print("=" * 60)
+male_salary_exp = employee_df.loc[employee_df['Gender'] == 'Male', ['Salary', 'Experience']]
+print(male_salary_exp)
+print("\n")
+
+# Bonus - showing the difference between iloc and loc
+print("=" * 60)
+print("BONUS: UNDERSTANDING THE DIFFERENCE")
+print("=" * 60)
+print("iloc (position-based):")
+print(f"  First row, first column: {employee_df.iloc[0, 0]}")  # John
+print(f"  Rows 2-4, columns 0-2:\n{employee_df.iloc[1:4, 0:3]}")
+print("\nloc (label-based):")
+print(f"  Row with Name 'Tom':\n{employee_df.loc[employee_df['Name'] == 'Tom']}")
+print(f"  Name and Salary columns:\n{employee_df.loc[:, ['Name', 'Salary']]}")
