@@ -1,0 +1,126 @@
+
+import numpy as np
+
+# Step 1: Open the CSV file using open() function
+file = open('loan_data.csv', 'r')
+
+# Step 2: Use numpy's genfromtxt to read the CSV data
+# Skip the header row (first row) since it contains column names
+loan_data = np.genfromtxt(file, delimiter=',', skip_header=1, dtype=None, encoding='utf-8')
+
+# Step 3: Close the file after reading
+file.close()
+
+print("File successfully read and closed.")
+print("="*60)
+
+# Display basic info about the data
+print(f"Total records loaded: {len(loan_data)}")
+print(f"Data type: {type(loan_data)}")
+print("\nFirst 5 records (sample):")
+for i in range(min(5, len(loan_data))):
+    print(f"  Record {i+1}: {loan_data[i]}")
+
+# Extract loan amounts (assuming loan amount is in a specific column)
+# Based on typical loan datasets, let's assume column indices:
+# need to adjust these indices based on the actual CSV structure
+# Common structure: [Loan_ID, Gender, Location, Region, Loan_Amount, Total_Price, etc.]
+
+print("\n" + "="*60)
+print("LOAN AMOUNT STATISTICAL ANALYSIS")
+print("="*60)
+
+# Method 1: If loan amounts are in a specific column (e.g., column 4 or 5)
+# Check the actual CSV structure and adjust the index
+try:
+    # assuming loan amount is the 5th column (index 4)
+    # If unsure, uncomment the line below to see all columns
+    # print("Sample row structure:", loan_data[0])
+    
+    # Extract the loan amount column (adjust index as needed)
+    # Common positions: column 4 for loan amount, column 5 for total price
+    loan_amounts = np.array([record[4] for record in loan_data])  # Adjust index!
+    
+    # Convert to float for calculations
+    loan_amounts = loan_amounts.astype(float)
+    
+    # Calculate statistics
+    mean_loan = np.mean(loan_amounts)
+    median_loan = np.median(loan_amounts)
+    std_loan = np.std(loan_amounts)
+    
+    print(f"\nLoan Amount Statistics:")
+    print(f"  Mean (Average): ${mean_loan:,.2f}")
+    print(f"  Median: ${median_loan:,.2f}")
+    print(f"  Standard Deviation: ${std_loan:,.2f}")
+    print(f"  Minimum: ${np.min(loan_amounts):,.2f}")
+    print(f"  Maximum: ${np.max(loan_amounts):,.2f}")
+    print(f"  Range: ${np.max(loan_amounts) - np.min(loan_amounts):,.2f}")
+    
+except Exception as e:
+    print(f"\nError extracting loan amounts: {e}")
+    print("Please check the column index for loan amounts in your dataset.")
+
+# Alternative approach: Using genfromtxt with specific columns
+print("\n" + "="*60)
+print("ALTERNATIVE APPROACH: READING SPECIFIC COLUMNS")
+print("="*60)
+
+# If you know the column names, you can read specific columns directly
+# This method is cleaner as it doesn't require manual column indices
+
+# Re-open the file (or use the already closed one)
+try:
+    # Method 2: Read only the loan amount column by name or index
+    # Using genfromtxt with usecols parameter
+    file2 = open('loan_data.csv', 'r')
+    
+    # Option A: Read by column index (e.g., column 4 is loan amount)
+    loan_amounts_direct = np.genfromtxt(file2, delimiter=',', skip_header=1, usecols=(4,))
+    file2.close()
+    
+    print("\nUsing direct column reading:")
+    print(f"  Mean: ${np.mean(loan_amounts_direct):,.2f}")
+    print(f"  Median: ${np.median(loan_amounts_direct):,.2f}")
+    print(f"  Std Dev: ${np.std(loan_amounts_direct):,.2f}")
+    
+except Exception as e:
+    print(f"\nAlternative method failed: {e}")
+    print("Make sure the dataset exists and has the expected structure.")
+
+# Bonus: Additional analysis by categories (if data includes gender/region)
+print("\n" + "="*60)
+print("BONUS: CATEGORICAL ANALYSIS")
+print("="*60)
+
+try:
+    # Extract gender and loan amounts for comparison
+    # Adjust column indices based on your actual data
+    genders = np.array([record[1] for record in loan_data])  # Assuming gender is column 1
+    loan_vals = loan_amounts
+    
+    # Separate loans by gender
+    male_loans = loan_vals[genders == b'Male']
+    female_loans = loan_vals[genders == b'Female']
+    
+    if len(male_loans) > 0:
+        print(f"\nMale borrowers:")
+        print(f"  Count: {len(male_loans)}")
+        print(f"  Average loan: ${np.mean(male_loans):,.2f}")
+    
+    if len(female_loans) > 0:
+        print(f"\nFemale borrowers:")
+        print(f"  Count: {len(female_loans)}")
+        print(f"  Average loan: ${np.mean(female_loans):,.2f}")
+        
+except Exception as e:
+    print(f"Categorical analysis skipped: {e}")
+
+print("\n" + "="*60)
+print("FILE HANDLING BEST PRACTICES DEMONSTRATED")
+print("="*60)
+print("✓ Used open() to open the file")
+print("✓ Used genfromtxt() with delimiter=',' to read CSV")
+print("✓ Closed the file using close() after reading")
+print("✓ Used numpy functions: mean(), median(), std()")
+print("✓ Handled potential errors gracefully")
