@@ -1,1 +1,69 @@
 
+import numpy as np
+
+# Create the grades array
+grades = np.array([85, 90, 88, 92, 95, 80, 75, 98, 89, 83])
+
+print("=" * 50)
+print("STUDENT GRADES ANALYSIS")
+print("=" * 50)
+
+# Basic statistics
+print(f"\nOriginal grades: {grades}")
+print(f"Mean (average): {np.mean(grades):.2f}")
+print(f"Median: {np.median(grades):.2f}")
+print(f"Standard deviation: {np.std(grades):.2f}")
+
+# Min and max
+print(f"\nHighest grade: {np.max(grades)}")
+print(f"Lowest grade: {np.min(grades)}")
+
+# Sorted grades
+sorted_grades = np.sort(grades)
+print(f"\nGrades sorted ascending: {sorted_grades}")
+
+# Index of highest grade
+highest_index = np.argmax(grades)
+print(f"\nIndex of highest grade ({grades[highest_index]}): position {highest_index}")
+
+# Count students above 90
+above_90_count = np.sum(grades > 90)
+print(f"\nNumber of students who scored above 90: {above_90_count}")
+
+# Percentage above 90
+above_90_percent = np.mean(grades > 90) * 100
+print(f"Percentage of students above 90: {above_90_percent:.1f}%")
+
+# Percentage below 75
+below_75_percent = np.mean(grades < 75) * 100
+print(f"Percentage of students below 75: {below_75_percent:.1f}%")
+
+# Extract high performers (above 90)
+high_performers = grades[grades > 90]
+print(f"\nHigh performers (grades above 90): {high_performers}")
+
+# Extract passing grades (above 75)
+passing_grades = grades[grades > 75]
+print(f"Passing grades (above 75): {passing_grades}")
+
+# Extra analysis - just because we can
+print("\n" + "=" * 50)
+print("EXTRA INSIGHTS")
+print("=" * 50)
+
+# Grade distribution
+print(f"\nGrade breakdown:")
+print(f"  A (90-100): {np.sum(grades >= 90)} students")
+print(f"  B (80-89): {np.sum((grades >= 80) & (grades < 90))} students")
+print(f"  C (70-79): {np.sum((grades >= 70) & (grades < 80))} students")
+print(f"  Below C: {np.sum(grades < 70)} students")
+
+# Performance stats
+print(f"\nPerformance range:")
+print(f"  Range: {np.max(grades) - np.min(grades)} points")
+print(f"  Above average: {np.sum(grades > np.mean(grades))} students")
+
+# The struggling students (below 80)
+struggling = grades[grades < 80]
+if len(struggling) > 0:
+    print(f"\nStudents who might need help (below 80): {struggling}")
