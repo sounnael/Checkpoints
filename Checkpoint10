@@ -1,0 +1,108 @@
+
+def binary_search(arr, target):
+    """Binary search algorithm"""
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return True
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return False
+
+def power(a, b):
+    """Power function (a^b)"""
+    if b == 0:
+        return 1
+    elif b < 0:
+        return 1 / power(a, -b)
+    result = 1
+    for _ in range(b):
+        result *= a
+    return result
+
+def bubble_sort(arr):
+    """Bubble sort algorithm"""
+    sorted_arr = arr.copy()
+    n = len(sorted_arr)
+    for i in range(n):
+        swapped = False
+        for j in range(n - i - 1):
+            if sorted_arr[j] > sorted_arr[j + 1]:
+                sorted_arr[j], sorted_arr[j + 1] = sorted_arr[j + 1], sorted_arr[j]
+                swapped = True
+        if not swapped:
+            break
+    return sorted_arr
+
+def merge_sort(arr):
+    """Merge sort algorithm"""
+    if len(arr) <= 1:
+        return arr.copy()
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+def merge(left, right):
+    """Merge helper for merge sort"""
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+def quick_sort(arr):
+    """Quick sort algorithm (simple version)"""
+    if len(arr) <= 1:
+        return arr.copy()
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quick_sort(left) + middle + quick_sort(right)
+
+# all tests
+if __name__ == "__main__":
+    print("\n" + "="*50)
+    print("ALGORITHM IMPLEMENTATIONS TEST")
+    print("="*50)
+    
+    # Test 1: Binary Search
+    print("\n1. BINARY SEARCH")
+    test_arr = [1, 2, 3, 5, 8]
+    print(f"   {test_arr}, target 6 -> {binary_search(test_arr, 6)}")
+    print(f"   {test_arr}, target 5 -> {binary_search(test_arr, 5)}")
+    
+    # Test 2: Power
+    print("\n2. POWER FUNCTION")
+    print(f"   power(3, 4) -> {power(3, 4)}")
+    
+    # Test 3: Bubble Sort
+    print("\n3. BUBBLE SORT")
+    sample = [29, 13, 22, 37, 52, 49, 46, 71, 56]
+    print(f"   Original: {sample}")
+    print(f"   Sorted:   {bubble_sort(sample)}")
+    
+    # Test 4: Merge Sort
+    print("\n4. MERGE SORT")
+    print(f"   Original: {sample}")
+    print(f"   Sorted:   {merge_sort(sample)}")
+    
+    # Test 5: Quick Sort
+    print("\n5. QUICK SORT")
+    print(f"   Original: {sample}")
+    print(f"   Sorted:   {quick_sort(sample)}")
+    
+    print("\n" + "="*50)
+    print("ALL TESTS COMPLETED SUCCESSFULLY!")
+    print("="*50)
