@@ -1,0 +1,154 @@
+# ==================== INDEX ERROR ====================
+# Original (Error):
+# mylist=[14, "hello", 967]
+# mylist[6]  # IndexError: list index out of range
+
+# Rectified:
+mylist = [14, "hello", 967]
+# Access only valid indices (0, 1, 2)
+print(mylist[2])  # Output: 967
+# Or check length before accessing
+if len(mylist) > 6:
+    print(mylist[6])
+else:
+    print(f"List has only {len(mylist)} elements")
+
+
+# ==================== IMPORT ERROR ====================
+# Original (Error):
+# import Pandas  # ImportError: No module named Pandas
+# import NumPy   # ImportError: No module named NumPy
+
+# Rectified:
+# Note: Package names are case-sensitive and should be lowercase
+import pandas  # Correct package name is 'pandas' (lowercase)
+import numpy as np  # Correct package name is 'numpy' (lowercase)
+
+# If packages aren't installed, use:
+# !pip install pandas numpy
+
+
+# ==================== SYNTAX ERROR ====================
+# Original (Error):
+# Print"python errors"  # SyntaxError: invalid syntax
+
+# Rectified:
+print("python errors")  # print() function requires parentheses in Python 3
+# Also 'Print' should be lowercase 'print'
+
+
+# ==================== KEY ERROR ====================
+# Original (Error):
+# mydictionary = {True: "hello", False: "bye", '3': 'python'}
+# mydictionary['True']  # KeyError: 'True'
+
+# Rectified:
+mydictionary = {True: "hello", False: "bye", '3': 'python'}
+
+# Access with correct key type (Boolean True, not string 'True')
+print(mydictionary[True])  # Output: hello
+
+# Or check if key exists before accessing
+key_to_find = 'True'
+if key_to_find in mydictionary:
+    print(mydictionary[key_to_find])
+else:
+    print(f"Key '{key_to_find}' not found")
+
+
+# ==================== INDENTATION ERROR ====================
+# Original (Error):
+# i = 14
+# while i < 78:
+#     print(i)  # IndentationError: expected an indented block
+#     i += 1
+
+# Rectified:
+i = 14
+while i < 78:
+    print(i)  # Must be indented (usually 4 spaces or a tab)
+    i += 1
+
+
+# ==================== STOPITERATION ERROR ====================
+# Original (Error):
+# it = iter([1, 2, 3])
+# next(it)  # 1
+# next(it)  # 2
+# next(it)  # 3
+# next(it)  # StopIteration error
+
+# Rectified:
+it = iter([1, 2, 3])
+print(next(it))  # 1
+print(next(it))  # 2
+print(next(it))  # 3
+
+# Use try-except to handle StopIteration gracefully
+try:
+    print(next(it))  # Will raise StopIteration
+except StopIteration:
+    print("No more items in iterator")
+
+# Alternative: Use for loop which handles StopIteration automatically
+it2 = iter([1, 2, 3])
+for item in it2:
+    print(item)
+
+
+# ==================== TYPE ERROR ====================
+# Original (Error):
+# '15' + 15  # TypeError: cannot concatenate 'str' and 'int' objects
+
+# Rectified:
+# Option 1: Convert string to int
+result1 = int('15') + 15
+print(result1)  # Output: 30
+
+# Option 2: Convert int to string
+result2 = '15' + str(15)
+print(result2)  # Output: '1515'
+
+
+# ==================== VALUE ERROR ====================
+# Original (Error):
+# int('python')  # ValueError: invalid literal for int() with base 10: 'python'
+
+# Rectified:
+# Option 1: Only convert strings that represent valid integers
+valid_number = int('123')  # Works fine
+print(valid_number)  # Output: 123
+
+# Option 2: Use try-except to handle invalid conversions
+try:
+    result = int('python')
+except ValueError as e:
+    print(f"Cannot convert: {e}")
+    result = None
+
+
+# ==================== NAME ERROR ====================
+# Original (Error):
+# python  # NameError: name 'python' is not defined
+
+# Rectified:
+# Define the variable first
+python = "Python is awesome!"
+print(python)  # Output: Python is awesome!
+
+# Or use a string literal
+print("python")
+
+
+# ==================== ZERO DIVISION ERROR ====================
+# Original (Error):
+# x = 19 / 0  # ZeroDivisionError: division by zero
+
+# Rectified:
+# Check denominator before division
+denominator = 0
+if denominator != 0:
+    x = 19 / denominator
+else:
+    print("Cannot divide by zero")
+    x = float('inf')  # Or set to a default value
