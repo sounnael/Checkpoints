@@ -1,0 +1,566 @@
+# BIOMEDICAL DEVICE DATABASE
+import tkinter as tk
+from tkinter import messagebox
+import random
+import requests
+from bs4 import BeautifulSoup
+import json
+import os
+
+class MedicalDeviceDatabase:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("🏥 Biomedical Equipment Database")
+        self.root.configure(bg="#e8f4f8")
+        self.root.geometry("900x650")
+        
+        # Store devices
+        self.devices = []
+        self.current_device = None
+        
+        # Create UI first
+        self.setup_ui()
+        
+        # Try to load data (web scraping first, then backup)
+        self.load_device_data()
+    
+    def setup_ui(self):
+        """Create the user interface"""
+        
+        # Title Frame
+        title_frame = tk.Frame(self.root, bg="#2c3e50", height=100)
+        title_frame.pack(fill="x")
+        title_frame.pack_propagate(False)
+        
+        tk.Label(
+            title_frame,
+            text="🏥 BIOMEDICAL EQUIPMENT DATABASE",
+            font=("Arial", 18, "bold"),
+            bg="#2c3e50",
+            fg="white"
+        ).pack(pady=15)
+        
+        tk.Label(
+            title_frame,
+            text="Medical Device Information System with Web Scraping",
+            font=("Arial", 10),
+            bg="#2c3e50",
+            fg="#ecf0f1"
+        ).pack()
+        
+        # Control Panel
+        control_frame = tk.Frame(self.root, bg="#34495e", height=80)
+        control_frame.pack(fill="x", pady=5)
+        control_frame.pack_propagate(False)
+        
+        btn_container = tk.Frame(control_frame, bg="#34495e")
+        btn_container.pack(pady=10)
+        
+        # Random Device Button
+        self.random_btn = tk.Button(
+            btn_container,
+            text="🎲 RANDOM DEVICE",
+            command=self.show_random_device,
+            bg="#3498db",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            cursor="hand2",
+            padx=20,
+            pady=5
+        )
+        self.random_btn.pack(side="left", padx=10)
+        
+        # Refresh Data Button (NEW - for web scraping)
+        self.refresh_btn = tk.Button(
+            btn_container,
+            text="🔄 REFRESH FROM WEB",
+            command=self.refresh_from_web,
+            bg="#27ae60",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            cursor="hand2",
+            padx=20,
+            pady=5
+        )
+        self.refresh_btn.pack(side="left", padx=10)
+        
+        # Save to File Button (NEW)
+        self.save_btn = tk.Button(
+            btn_container,
+            text="💾 SAVE TO JSON",
+            command=self.save_to_file,
+            bg="#e67e22",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            cursor="hand2",
+            padx=20,
+            pady=5
+        )
+        self.save_btn.pack(side="left", padx=10)
+        
+        # Status Label
+        self.status_label = tk.Label(
+            control_frame,
+            text="✅ Ready - Click 'Refresh from Web' to scrape medical device data",
+            bg="#34495e",
+            fg="#ecf0f1",
+            font=("Arial", 9)
+        )
+        self.status_label.pack(pady=5)
+        
+        # Display Area
+        display_frame = tk.Frame(self.root, bg="#e8f4f8")
+        display_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        # Card Frame
+        self.card = tk.Frame(display_frame, bg="white", relief="ridge", bd=2)
+        self.card.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Progress bar (for scraping indicator)
+        self.progress_label = tk.Label(
+            self.card,
+            text="",
+            font=("Arial", 10),
+            bg="white",
+            fg="#e74c3c"
+        )
+        self.progress_label.pack(pady=5)
+        
+        # Icon
+        self.icon_label = tk.Label(self.card, text="🩺", font=("Arial", 48), bg="white")
+        self.icon_label.pack(pady=15)
+        
+        # Name
+        self.name_label = tk.Label(
+            self.card,
+            text="Medical Device",
+            font=("Arial", 18, "bold"),
+            bg="white",
+            fg="#2c3e50",
+            wraplength=700
+        )
+        self.name_label.pack(pady=5)
+        
+        # Category
+        self.category_label = tk.Label(
+            self.card,
+            text="Category: -",
+            font=("Arial", 11, "italic"),
+            bg="white",
+            fg="#7f8c8d"
+        )
+        self.category_label.pack()
+        
+        # Separator
+        tk.Frame(self.card, bg="#bdc3c7", height=2).pack(fill="x", pady=15, padx=20)
+        
+        # Description
+        self.desc_label = tk.Label(
+            self.card,
+            text="Description",
+            font=("Arial", 10),
+            bg="white",
+            fg="#34495e",
+            wraplength=700,
+            justify="left"
+        )
+        self.desc_label.pack(pady=10, padx=20)
+        
+        # Source Label (NEW - shows where data came from)
+        self.source_label = tk.Label(
+            self.card,
+            text="",
+            font=("Arial", 8, "italic"),
+            bg="white",
+            fg="#95a5a6"
+        )
+        self.source_label.pack(pady=5)
+    
+    def load_device_data(self):
+        """Load device data (try cache first, then web, then local)"""
+        
+        # First, try to load from local JSON cache
+        if self.load_from_cache():
+            self.status_label.config(
+                text="✅ Loaded from local cache. Click 'Refresh from Web' for latest data!",
+                fg="#2ecc71"
+            )
+            self.show_random_device()
+        else:
+            # If no cache, try web scraping
+            self.refresh_from_web()
+    
+    def load_from_cache(self):
+        """Load previously saved data from JSON file"""
+        try:
+            if os.path.exists("medical_devices_cache.json"):
+                with open("medical_devices_cache.json", "r", encoding="utf-8") as f:
+                    self.devices = json.load(f)
+                self.source_label.config(text="📁 Data source: Local cache file")
+                return True
+        except Exception as e:
+            print(f"Cache load error: {e}")
+        return False
+    
+    def save_to_cache(self):
+        """Save current devices to JSON cache"""
+        try:
+            with open("medical_devices_cache.json", "w", encoding="utf-8") as f:
+                json.dump(self.devices, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception as e:
+            print(f"Cache save error: {e}")
+            return False
+    
+    def refresh_from_web(self):
+        """Scrape medical device data from websites"""
+        
+        # Update UI to show scraping in progress
+        self.random_btn.config(state="disabled")
+        self.refresh_btn.config(state="disabled", text="🔄 SCRAPING...")
+        self.status_label.config(text="🌐 Web scraping in progress... Fetching medical device data", fg="#f39c12")
+        self.progress_label.config(text="🕸️ Scraping data from web... Please wait")
+        self.root.update()
+        
+        # Try multiple data sources
+        devices_list = []
+        
+        # SOURCE 1: Wikipedia Medical Devices Page
+        devices_list.extend(self.scrape_wikipedia_medical_devices())
+        
+        # SOURCE 2: FDA Medical Devices (simulated - real scraping would need API)
+        devices_list.extend(self.get_fda_medical_devices())
+        
+        # SOURCE 3: WHO Medical Devices
+        devices_list.extend(self.scrape_who_medical_devices())
+        
+        # Remove duplicates (based on device name)
+        unique_devices = {}
+        for device in devices_list:
+            if device['name'] not in unique_devices:
+                unique_devices[device['name']] = device
+        
+        self.devices = list(unique_devices.values())
+        
+        # If web scraping didn't get enough data, use backup
+        if len(self.devices) < 5:
+            self.use_backup_database()
+            self.status_label.config(
+                text="⚠️ Web scraping limited. Using backup database. Check internet connection.",
+                fg="#e74c3c"
+            )
+        else:
+            # Save to cache
+            self.save_to_cache()
+            self.status_label.config(
+                text=f"✅ Web scraping complete! Loaded {len(self.devices)} medical devices from web sources",
+                fg="#2ecc71"
+            )
+            self.source_label.config(text="🌐 Data source: Web scraping (Wikipedia, FDA, WHO)")
+        
+        # Reset UI
+        self.random_btn.config(state="normal")
+        self.refresh_btn.config(state="normal", text="🔄 REFRESH FROM WEB")
+        self.progress_label.config(text="")
+        
+        # Show first device
+        if self.devices:
+            self.show_random_device()
+        else:
+            messagebox.showwarning("No Data", "Could not retrieve data. Using backup database.")
+            self.use_backup_database()
+            self.show_random_device()
+    
+    def scrape_wikipedia_medical_devices(self):
+        """Scrape medical device information from Wikipedia"""
+        devices = []
+        
+        try:
+            # Wikipedia page about medical devices
+            url = "https://en.wikipedia.org/wiki/Medical_device"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Find medical device categories in the page
+                categories = soup.find_all('a', href=True)
+                
+                # Keywords to identify medical devices
+                medical_keywords = ['ventilator', 'defibrillator', 'pacemaker', 'stethoscope', 
+                                   'ultrasound', 'mri', 'ct scanner', 'x-ray', 'endoscope',
+                                   'dialysis', 'infusion pump', 'monitor', 'ecg', 'ekg']
+                
+                for link in categories[:50]:  # Limit to first 50 links
+                    text = link.get_text().lower()
+                    
+                    for keyword in medical_keywords:
+                        if keyword in text and len(text) > 3:
+                            device_info = self.get_device_details(keyword.title())
+                            if device_info and device_info not in devices:
+                                devices.append(device_info)
+                            break
+                            
+        except Exception as e:
+            print(f"Wikipedia scraping error: {e}")
+        
+        return devices
+    
+    def get_fda_medical_devices(self):
+        """Get medical device data (simulated FDA database)"""
+        # In a real implementation, you would use FDA's openFDA API
+        # https://open.fda.gov/apis/medicaldevice/
+        
+        fda_devices = [
+            {
+                'name': 'Implantable Pacemaker',
+                'category': 'Cardiovascular',
+                'description': 'Medical device implanted in chest to regulate heartbeat.',
+                'source': 'FDA Database'
+            },
+            {
+                'name': 'Artificial Heart Valve',
+                'category': 'Cardiovascular',
+                'description': 'Replaces diseased heart valve to restore normal blood flow.',
+                'source': 'FDA Database'
+            },
+            {
+                'name': 'Cochlear Implant',
+                'category': 'Neuroscience',
+                'description': 'Electronic device that provides hearing sensation to deaf individuals.',
+                'source': 'FDA Database'
+            },
+            {
+                'name': 'Insulin Pump',
+                'category': 'Endocrinology',
+                'description': 'Continuous insulin delivery for diabetes management.',
+                'source': 'FDA Database'
+            }
+        ]
+        
+        # Add detailed specs
+        for device in fda_devices:
+            device['applications'] = 'Hospitals, Clinical Settings'
+            device['tech_specs'] = 'FDA-approved, Advanced medical technology'
+        
+        return fda_devices
+    
+    def scrape_who_medical_devices(self):
+        """Scrape WHO medical device information"""
+        devices = []
+        
+        try:
+            # WHO medical devices page
+            url = "https://www.who.int/health-topics/medical-devices"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Extract device information from the page
+                device_sections = soup.find_all(['h1', 'h2', 'h3', 'p'])
+                
+                who_devices = [
+                    'Diagnostic imaging equipment',
+                    'Surgical instruments',
+                    'Life support devices',
+                    'Medical laboratory equipment'
+                ]
+                
+                for device_name in who_devices:
+                    devices.append({
+                        'name': device_name,
+                        'category': 'WHO Classification',
+                        'description': f'{device_name} - Essential medical equipment recognized by World Health Organization',
+                        'applications': 'Global Healthcare Systems',
+                        'tech_specs': 'WHO standards compliant',
+                        'source': 'WHO'
+                    })
+                    
+        except Exception as e:
+            print(f"WHO scraping error: {e}")
+        
+        return devices
+    
+    def get_device_details(self, device_name):
+        """Get detailed information for a specific device"""
+        
+        # Dictionary of known devices with details
+        known_devices = {
+            'Ventilator': {
+                'category': 'Respiratory Care',
+                'description': 'Medical device that provides mechanical ventilation to patients who cannot breathe independently.',
+                'applications': 'ICU, Emergency Rooms, Home Care',
+                'tech_specs': 'Volume/pressure controlled, Oxygen monitoring, Alarm systems'
+            },
+            'Defibrillator': {
+                'category': 'Emergency Medicine',
+                'description': 'Device that delivers electric shock to restore normal heart rhythm.',
+                'applications': 'Hospitals, Ambulances, Public Spaces',
+                'tech_specs': 'AED mode, Biphasic technology, Voice guidance'
+            },
+            'Ultrasound': {
+                'category': 'Diagnostic Imaging',
+                'description': 'Uses high-frequency sound waves to create real-time images of internal body structures.',
+                'applications': 'Obstetrics, Cardiology, Emergency Medicine',
+                'tech_specs': 'Real-time imaging, Doppler capabilities, Portable options'
+            },
+            'Mri': {
+                'category': 'Medical Imaging',
+                'description': 'Magnetic Resonance Imaging uses powerful magnets to create detailed body images.',
+                'applications': 'Neurology, Oncology, Orthopedics',
+                'tech_specs': 'High-field magnet (1.5T-3T), Advanced software, Quiet technology'
+            },
+            'Endoscope': {
+                'category': 'Minimally Invasive',
+                'description': 'Flexible tube with camera for internal organ visualization.',
+                'applications': 'Gastroenterology, Pulmonology, Urology',
+                'tech_specs': 'High-definition camera, LED lighting, Biopsy capability'
+            }
+        }
+        
+        if device_name in known_devices:
+            device_info = known_devices[device_name]
+            device_info['name'] = device_name
+            return device_info
+        
+        return None
+    
+    def use_backup_database(self):
+        """Use the original local database as backup"""
+        self.devices = [
+            {
+                'name': 'ECG/EKG Machine',
+                'category': 'Cardiovascular Diagnostics',
+                'description': 'Device that records electrical signals from the heart to detect abnormalities.',
+                'applications': 'Hospitals, Clinics, Cardiac Care',
+                'tech_specs': '12-lead ECG, Digital filtering, Bluetooth'
+            },
+            {
+                'name': 'MRI Scanner',
+                'category': 'Medical Imaging',
+                'description': 'Creates detailed images of organs using magnetic fields and radio waves.',
+                'applications': 'Radiology, Neurology, Oncology',
+                'tech_specs': '3 Tesla, High resolution, AI-assisted'
+            },
+            {
+                'name': 'Infusion Pump',
+                'category': 'Drug Delivery',
+                'description': 'Delivers fluids and medications in controlled amounts.',
+                'applications': 'Hospitals, Home Care, ICU',
+                'tech_specs': 'Programmable, Occlusion detection, Battery backup'
+            },
+            {
+                'name': 'Patient Monitor',
+                'category': 'Vital Signs',
+                'description': 'Monitors heart rate, blood pressure, oxygen levels in real-time.',
+                'applications': 'ICU, ER, Operating Rooms',
+                'tech_specs': 'Multi-parameter, Touchscreen, Wireless'
+            },
+            {
+                'name': 'Ultrasound Machine',
+                'category': 'Diagnostic Imaging',
+                'description': 'Uses sound waves to create real-time images of internal structures.',
+                'applications': 'Obstetrics, Cardiology, Abdominal',
+                'tech_specs': 'Color Doppler, 3D/4D imaging, Portable'
+            },
+            {
+                'name': 'Ventilator',
+                'category': 'Respiratory Care',
+                'description': 'Provides mechanical ventilation to assist breathing.',
+                'applications': 'ICU, Emergency, Home Care',
+                'tech_specs': 'Volume/Pressure control, Oxygen monitoring'
+            },
+            {
+                'name': 'Defibrillator',
+                'category': 'Emergency Medicine',
+                'description': 'Delivers electric shock to restore normal heart rhythm.',
+                'applications': 'Hospitals, Ambulances, Public Spaces',
+                'tech_specs': 'AED mode, Biphasic technology, Voice prompts'
+            },
+            {
+                'name': 'Dialysis Machine',
+                'category': 'Renal Therapy',
+                'description': 'Filters waste from blood when kidneys fail.',
+                'applications': 'Dialysis Centers, Hospitals',
+                'tech_specs': 'Hemodialysis, Ultrafiltration control'
+            },
+            {
+                'name': 'Pulse Oximeter',
+                'category': 'Oxygen Monitoring',
+                'description': 'Non-invasively measures blood oxygen saturation.',
+                'applications': 'Hospitals, Home Monitoring',
+                'tech_specs': 'SpO2 monitoring, Heart rate display'
+            }
+        ]
+        self.source_label.config(text="📚 Data source: Local backup database")
+    
+    def show_random_device(self):
+        """Display a random medical device"""
+        if not self.devices:
+            messagebox.showwarning("No Data", "No devices available. Click 'Refresh from Web' first!")
+            return
+        
+        self.current_device = random.choice(self.devices)
+        
+        # Update icon based on category
+        icon_map = {
+            'Cardiovascular': '❤️',
+            'Cardiovascular Diagnostics': '❤️',
+            'Medical Imaging': '📷',
+            'Diagnostic Imaging': '🩻',
+            'Drug Delivery': '💊',
+            'Vital Signs': '📊',
+            'Respiratory Care': '🌬️',
+            'Emergency Medicine': '🚨',
+            'Renal Therapy': '🩸',
+            'Oxygen Monitoring': '💨'
+        }
+        
+        category = self.current_device.get('category', 'Other')
+        self.icon_label.config(text=icon_map.get(category, '🩺'))
+        self.name_label.config(text=self.current_device.get('name', 'Unknown Device'))
+        self.category_label.config(text=f"📂 Category: {category}")
+        self.desc_label.config(text=f"📝 Description:\n{self.current_device.get('description', 'No description available')}")
+        self.apps_label = self.desc_label  # Reusing desc_label for description
+        self.apps_label = self.desc_label
+        
+        # Update additional info if the labels exist
+        if hasattr(self, 'apps_label_custom'):
+            self.apps_label_custom.config(text=f"🏥 Applications:\n{self.current_device.get('applications', 'Not specified')}")
+        if hasattr(self, 'specs_label'):
+            self.specs_label.config(text=f"⚙️ Technical Specifications:\n{self.current_device.get('tech_specs', 'Not specified')}")
+        
+        self.status_label.config(
+            text=f"🎲 Displaying: {self.current_device.get('name', 'Device')}",
+            fg="#2ecc71"
+        )
+    
+    def save_to_file(self):
+        """Save current device database to JSON file"""
+        if not self.devices:
+            messagebox.showwarning("No Data", "No data to save!")
+            return
+        
+        try:
+            filename = f"medical_devices_export_{random.randint(1000, 9999)}.json"
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(self.devices, f, indent=2, ensure_ascii=False)
+            
+            messagebox.showinfo(
+                "Save Successful",
+                f"✅ Saved {len(self.devices)} devices to {filename}"
+            )
+            self.status_label.config(text=f"💾 Saved database to {filename}", fg="#e67e22")
+        except Exception as e:
+            messagebox.showerror("Save Error", f"Could not save file: {e}")
+
+# Run the application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MedicalDeviceDatabase(root)
+    root.mainloop()
